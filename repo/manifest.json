@@ -9,19 +9,19 @@
     "versions": [
       {
         "version": "1.1.0.0",
-        "changelog": "Build ced6c50844001595dfdf82844c9d25b5c7328da7",
+        "changelog": "Build 0fa4386d031811fdb732db73bf93f2aa241735a4",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.11.zip?v=3",
-        "checksum": "908e77be367961bb07399b3714b60885",
-        "timestamp": "2026-10-30T16:11:48Z"
+        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.11-b4.zip",
+        "checksum": "06e496c1bb98177d6abb9b0564699cad",
+        "timestamp": "2026-10-30T17:02:31Z"
       },
       {
         "version": "1.0.0.0",
-        "changelog": "Build ced6c50844001595dfdf82844c9d25b5c7328da7",
+        "changelog": "Build 0fa4386d031811fdb732db73bf93f2aa241735a4",
         "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.10.zip?v=3",
-        "checksum": "9c7a54b156daf3c77c0d70151e0acbaa",
-        "timestamp": "2026-10-30T16:11:48Z"
+        "sourceUrl": "https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/content-guard-10.10-b4.zip",
+        "checksum": "53181aa057a0893213f4a86be3e1f941",
+        "timestamp": "2026-10-30T17:02:31Z"
       }
     ]
   }
