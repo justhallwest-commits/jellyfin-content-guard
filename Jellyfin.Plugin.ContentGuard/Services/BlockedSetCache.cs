@@ -19,7 +19,12 @@ namespace Jellyfin.Plugin.ContentGuard.Services;
 public class BlockedSetCache
 {
     /// <summary>Above this many ids we skip query-level exclusion (the response filter still applies).</summary>
+#if JELLYFIN_10_10
+    // 10.10 writes one SQL parameter per excluded id, so keep this modest.
+    public const int MaxInjectedIds = 3000;
+#else
     public const int MaxInjectedIds = 20000;
+#endif
 
     private readonly ILibraryManager _libraryManager;
     private readonly RuleEvaluator _evaluator;

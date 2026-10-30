@@ -38,14 +38,23 @@ A global API filter runs on every request from a user who has an active profile:
 Because enforcement happens on the server, it applies the same way on every client
 (web, Android/Fire TV, iOS, Roku, Kodi, and your HallFlix TV app).
 
-## Install (manual)
+## Install (recommended: plugin repository)
 
-1. Build it: push this repo to GitHub. The included Actions workflow produces `content-guard.zip`
-   (download it from the run's **Artifacts**, or push a tag like `v1.0.0` to get a Release).
-2. Unzip `Jellyfin.Plugin.ContentGuard.dll` into a new folder in Jellyfin's plugins directory:
-   - Unraid Docker: `/config/plugins/ContentGuard_1.0.0.0/` (on the host this is usually
-     `/mnt/user/appdata/jellyfin/plugins/ContentGuard_1.0.0.0/`)
-3. Restart Jellyfin. **Dashboard → Plugins → Content Guard** (it's also in the dashboard sidebar).
+Works on any Jellyfin server, including the UGREEN NAS app, with no file copying.
+
+1. Jellyfin **Dashboard → Plugins → Repositories → +** (in 10.10: Dashboard → Plugins → **Repositories** tab)
+2. Name: `Content Guard`. URL:
+   `https://raw.githubusercontent.com/justhallwest-commits/jellyfin-content-guard/main/repo/manifest.json`
+3. **Catalog** → **Content Guard** → **Install**. Jellyfin automatically picks the build that matches your
+   server (1.0.0.0 for 10.10.x, 1.1.0.0 for 10.11.x).
+4. Restart Jellyfin (on the UGREEN, stop and start the Jellyfin app).
+5. Settings: **Dashboard → Plugins → Content Guard**.
+
+### Manual install
+
+Download `content-guard-10.10.zip` (UGREEN, Jellyfin 10.10.x) or `content-guard-10.11.zip` from the
+`repo/` folder. Unzip the DLL into `<Jellyfin data folder>/plugins/ContentGuard_<version>/` and restart.
+Dashboard → **Paths** (10.10: the Dashboard home page) shows the Jellyfin data folder.
 
 ## Use
 
@@ -61,8 +70,8 @@ You can leave Jellyfin's own "Block items with tags" settings in place or clear 
 
 ## Compatibility
 
-Targets **Jellyfin 10.11.x** (`net9.0`). For a 10.10.x server, change `TargetFramework` to `net8.0`
-and the package versions to `10.10.*` in the `.csproj`.
+Every build produces two packages: **10.10.x** (`net8.0`, plugin 1.0.0.0, used on the UGREEN NAS) and
+**10.11.x** (`net9.0`, plugin 1.1.0.0). Build locally with `dotnet build -p:JellyfinVersion=10.10` or `10.11`.
 
 ## Notes / limits
 
