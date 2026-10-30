@@ -61,19 +61,24 @@ jobs:
 
       - name: Write manifest
         run: |
+          # Jellyfin 10.10 requires sourceUrl to END in .zip (no query string), so cache-bust
+          # with a per-build file name instead and remove the previous build's zips.
           mkdir -p repo
-          cp artifacts/*/content-guard-*.zip repo/
+          rm -f repo/*.zip
+          cp artifacts/content-guard-10.10/content-guard-10.10.zip repo/content-guard-10.10-b${{ github.run_number }}.zip
+          cp artifacts/content-guard-10.11/content-guard-10.11.zip repo/content-guard-10.11-b${{ github.run_number }}.zip
           python3 - <<'EOF'
           import hashlib, json, datetime, os
           base = "https://raw.githubusercontent.com/${{ github.repository }}/main/repo/"
           now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-          builds = [("1.1.0.0", "10.11.0.0", "content-guard-10.11.zip"),
-                    ("1.0.0.0", "10.10.0.0", "content-guard-10.10.zip")]
+          run = "${{ github.run_number }}"
+          builds = [("1.1.0.0", "10.11.0.0", f"content-guard-10.11-b{run}.zip"),
+                    ("1.0.0.0", "10.10.0.0", f"content-guard-10.10-b{run}.zip")]
           versions = []
           for ver, abi, f in builds:
               md5 = hashlib.md5(open(os.path.join("repo", f), "rb").read()).hexdigest()
               versions.append({"version": ver, "changelog": "Build ${{ github.sha }}",
-                               "targetAbi": abi, "sourceUrl": base + f + "?v=${{ github.run_number }}",
+                               "targetAbi": abi, "sourceUrl": base + f,
                                "checksum": md5, "timestamp": now})
           manifest = [{
               "guid": "c4c95473-00dd-462d-9561-f825460e5048",
@@ -91,7 +96,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add repo
+          git add -A repo
           git commit -m "Update plugin repository [skip ci]" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main

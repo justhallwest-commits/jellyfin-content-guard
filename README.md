@@ -52,8 +52,8 @@ Works on any Jellyfin server, including the UGREEN NAS app, with no file copying
 
 ### Manual install
 
-Download `content-guard-10.10.zip` (UGREEN, Jellyfin 10.10.x) or `content-guard-10.11.zip` from the
-`repo/` folder. Unzip the DLL into `<Jellyfin data folder>/plugins/ContentGuard_<version>/` and restart.
+Download `content-guard-10.10-b<build>.zip` (UGREEN, Jellyfin 10.10.x) or `content-guard-10.11-b<build>.zip`
+from the `repo/` folder. Unzip the DLL into `<Jellyfin data folder>/plugins/ContentGuard_<version>/` and restart.
 Dashboard → **Paths** (10.10: the Dashboard home page) shows the Jellyfin data folder.
 
 ## Use
