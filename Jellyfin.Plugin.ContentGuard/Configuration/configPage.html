@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Content Guard</title>
+</head>
+<body>
+<div id="ContentGuardPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+<style>
+    #ContentGuardPage .cg-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 1.2em 1.4em; margin: 0 0 1.4em; }
+    #ContentGuardPage .cg-card.cg-off { opacity: .55; }
+    #ContentGuardPage .cg-head { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; }
+    #ContentGuardPage .cg-head .inputContainer { flex: 1 1 260px; margin: 0; }
+    #ContentGuardPage .cg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1em 1.6em; margin-top: 1em; }
+    #ContentGuardPage .cg-label { font-weight: 600; margin: 0 0 .35em; display: block; }
+    #ContentGuardPage .cg-hint { opacity: .65; font-size: .85em; margin: .3em 0 0; }
+    #ContentGuardPage .cg-chips { display: flex; flex-wrap: wrap; gap: .4em; align-items: center; padding: .45em; min-height: 2.6em; border-radius: 6px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.1); }
+    #ContentGuardPage .cg-chip { display: inline-flex; align-items: center; gap: .35em; padding: .2em .35em .2em .7em; border-radius: 999px; background: #00a4dc; color: #fff; font-size: .9em; }
+    #ContentGuardPage .cg-chip.allow { background: #2e9e5b; }
+    #ContentGuardPage .cg-chip button { border: 0; background: rgba(0,0,0,.25); color: #fff; border-radius: 50%; width: 1.4em; height: 1.4em; cursor: pointer; line-height: 1; }
+    #ContentGuardPage .cg-chips input { flex: 1 1 120px; min-width: 120px; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; padding: .2em; }
+    #ContentGuardPage .cg-users { display: flex; flex-wrap: wrap; gap: .3em 1.4em; }
+    #ContentGuardPage .cg-users label { display: inline-flex; gap: .4em; align-items: center; cursor: pointer; }
+    #ContentGuardPage .cg-row { display: flex; gap: .6em; flex-wrap: wrap; align-items: center; margin-top: 1em; }
+    #ContentGuardPage .cg-opts label { display: flex; gap: .5em; align-items: center; margin: .35em 0; cursor: pointer; }
+    #ContentGuardPage table.cg-table { width: 100%; border-collapse: collapse; margin-top: .8em; font-size: .92em; }
+    #ContentGuardPage .cg-table th, #ContentGuardPage .cg-table td { text-align: left; padding: .45em .6em; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
+    #ContentGuardPage .cg-badge { display: inline-block; padding: .1em .55em; border-radius: 4px; font-size: .8em; font-weight: 700; }
+    #ContentGuardPage .cg-badge.blocked { background: #b3261e; color: #fff; }
+    #ContentGuardPage .cg-badge.visible { background: #2e9e5b; color: #fff; }
+    #ContentGuardPage .cg-preview { margin-top: 1em; max-height: 360px; overflow: auto; }
+    #ContentGuardPage .cg-muted { opacity: .65; }
+    #ContentGuardPage .cg-danger { background: #6b1d1a !important; }
+</style>
+
+<div data-role="content">
+<div class="content-primary">
+
+    <div class="verticalSection">
+        <h2 class="sectionTitle">Content Guard</h2>
+        <p class="cg-muted">Hide titles from specific users by tag, genre or rating. Rules apply on every client and every screen, including home rows, search, Next Up, Continue Watching and direct playback links. Episodes and seasons inherit from their series automatically, and changes apply straight away with no rescan.</p>
+    </div>
+
+    <div class="cg-card">
+        <div class="cg-opts">
+            <label><input is="emby-checkbox" type="checkbox" id="cgEnabled"><span>Enforce Content Guard rules</span></label>
+            <label><input is="emby-checkbox" type="checkbox" id="cgQueryExclusion"><span>Also exclude blocked items in the database query (keeps page counts accurate while browsing)</span></label>
+            <label><input is="emby-checkbox" type="checkbox" id="cgLogBlocks"><span>Log every hidden item to the server log (for troubleshooting)</span></label>
+        </div>
+    </div>
+
+    <div class="verticalSection">
+        <div class="cg-row" style="justify-content: space-between; margin: 0 0 1em;">
+            <h2 class="sectionTitle" style="margin:0;">Profiles</h2>
+            <button is="emby-button" type="button" class="raised" id="cgAddProfile"><span>+ Add profile</span></button>
+        </div>
+        <div id="cgProfiles"></div>
+    </div>
+
+    <div class="cg-row" style="margin-bottom: 2.5em;">
+        <button is="emby-button" type="button" class="raised button-submit block" id="cgSave"><span>Save</span></button>
+    </div>
+
+    <div class="verticalSection cg-card">
+        <h2 class="sectionTitle" style="margin-top:0;">Test as a user</h2>
+        <p class="cg-muted" style="margin-top:0;">Search for a title to see whether that user can see it, and which rule hides it. Save your changes first.</p>
+        <div class="cg-row">
+            <select is="emby-select" id="cgTestUser" label="User"></select>
+            <div class="inputContainer" style="flex: 1 1 260px; margin:0;">
+                <input is="emby-input" type="text" id="cgTestTerm" label="Title contains" />
+            </div>
+            <button is="emby-button" type="button" class="raised" id="cgTestBtn"><span>Test</span></button>
+        </div>
+        <div id="cgTestOut"></div>
+    </div>
+
+    <datalist id="cgTagList"></datalist>
+    <datalist id="cgGenreList"></datalist>
+    <datalist id="cgRatingList"></datalist>
+
+</div>
+</div>
+
+<script type="text/javascript">
+(function () {
+    var pluginId = 'c4c95473-00dd-462d-9561-f825460e5048';
+    var page = document.querySelector('#ContentGuardPage');
+    var config = null;
+    var users = [];
+
+    function P(o, k) { if (!o) return undefined; return o[k] !== undefined ? o[k] : o[k.charAt(0).toLowerCase() + k.slice(1)]; }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    function normId(id) { return String(id || '').replace(/-/g, '').toLowerCase(); }
+    function newGuid() {
+        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) { var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+    }
+    function toast(msg) { if (window.Dashboard && Dashboard.alert) { Dashboard.alert(msg); } else { alert(msg); } }
+
+    function emptyProfile() {
+        return { Id: newGuid(), Name: 'Kids', Enabled: true, UserIds: [], BlockedTags: [], BlockedGenres: [], BlockedRatings: [], AllowedTags: [], BlockUnrated: false, InheritFromParents: true, InheritFromLibrary: true };
+    }
+
+    function normalizeProfile(p) {
+        return {
+            Id: P(p, 'Id') || newGuid(),
+            Name: P(p, 'Name') || 'Profile',
+            Enabled: P(p, 'Enabled') !== false,
+            UserIds: (P(p, 'UserIds') || []).slice(),
+            BlockedTags: (P(p, 'BlockedTags') || []).slice(),
+            BlockedGenres: (P(p, 'BlockedGenres') || []).slice(),
+            BlockedRatings: (P(p, 'BlockedRatings') || []).slice(),
+            AllowedTags: (P(p, 'AllowedTags') || []).slice(),
+            BlockUnrated: !!P(p, 'BlockUnrated'),
+            InheritFromParents: P(p, 'InheritFromParents') !== false,
+            InheritFromLibrary: P(p, 'InheritFromLibrary') !== false
+        };
+    }
+
+    /* ---------- chip editor ---------- */
+    function chipEditor(values, listId, allowStyle) {
+        var wrap = document.createElement('div');
+        wrap.className = 'cg-chips';
+        var input = document.createElement('input');
+        input.setAttribute('list', listId);
+        input.placeholder = 'Type and press Enter (* = wildcard)';
+
+        function render() {
+            wrap.querySelectorAll('.cg-chip').forEach(function (c) { c.remove(); });
+            values.forEach(function (v, idx) {
+                var chip = document.createElement('span');
+                chip.className = 'cg-chip' + (allowStyle ? ' allow' : '');
+                chip.innerHTML = '<span>' + esc(v) + '</span><button type="button" title="Remove">&times;</button>';
+                chip.querySelector('button').addEventListener('click', function () { values.splice(idx, 1); render(); });
+                wrap.insertBefore(chip, input);
+            });
+        }
+        function commit() {
+            input.value.split(',').forEach(function (raw) {
+                var v = raw.trim();
+                if (v && !values.some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) values.push(v);
+            });
+            input.value = '';
+            render();
+        }
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commit(); }
+            else if (e.key === 'Backspace' && !input.value && values.length) { values.pop(); render(); }
+        });
+        input.addEventListener('change', function () { if (input.value.trim()) commit(); });
+        input.addEventListener('blur', function () { if (input.value.trim()) commit(); });
+        wrap.addEventListener('click', function (e) { if (e.target === wrap) input.focus(); });
+        wrap.appendChild(input);
+        render();
+        return wrap;
+    }
+
+    function field(label, hint, node) {
+        var d = document.createElement('div');
+        d.innerHTML = '<span class="cg-label">' + esc(label) + '</span>';
+        d.appendChild(node);
+        if (hint) { var h = document.createElement('p'); h.className = 'cg-hint'; h.textContent = hint; d.appendChild(h); }
+        return d;
+    }
+
+    function checkbox(text, checked, onChange) {
+        var l = document.createElement('label');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = checked;
+        cb.addEventListener('change', function () { onChange(cb.checked); });
+        var s = document.createElement('span');
+        s.textContent = text;
+        l.appendChild(cb); l.appendChild(s);
+        return l;
+    }
+
+    /* ---------- profile cards ---------- */
+    function renderProfiles() {
+        var host = page.querySelector('#cgProfiles');
+        host.innerHTML = '';
+        if (!config.Profiles.length) {
+            host.innerHTML = '<p class="cg-muted">No profiles yet. Add one, give it some blocked tags, and tick the users it applies to.</p>';
+            return;
+        }
+        config.Profiles.forEach(function (p, index) {
+            var card = document.createElement('div');
+            card.className = 'cg-card' + (p.Enabled ? '' : ' cg-off');
+
+            var head = document.createElement('div');
+            head.className = 'cg-head';
+            var nameWrap = document.createElement('div');
+            nameWrap.className = 'inputContainer';
+            var name = document.createElement('input');
+            name.className = 'emby-input';
+            name.value = p.Name;
+            name.placeholder = 'Profile name';
+            name.style.fontSize = '1.15em';
+            name.addEventListener('input', function () { p.Name = name.value; });
+            nameWrap.appendChild(name);
+            head.appendChild(nameWrap);
+            head.appendChild(checkbox('Enabled', p.Enabled, function (v) { p.Enabled = v; card.classList.toggle('cg-off', !v); }));
+
+            var prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
+            prevBtn.className = 'raised emby-button';
+            prevBtn.textContent = 'Preview hidden items';
+            head.appendChild(prevBtn);
+
+            var delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'raised emby-button cg-danger';
+            delBtn.textContent = 'Delete';
+            delBtn.addEventListener('click', function () {
+                if (confirm('Delete profile "' + p.Name + '"? (Takes effect when you Save.)')) { config.Profiles.splice(index, 1); renderProfiles(); }
+            });
+            head.appendChild(delBtn);
+            card.appendChild(head);
+
+            // users
+            var userBox = document.createElement('div');
+            userBox.className = 'cg-users';
+            users.forEach(function (u) {
+                var uid = normId(u.Id);
+                var on = p.UserIds.some(function (x) { return normId(x) === uid; });
+                userBox.appendChild(checkbox(u.Name + (u.Policy && u.Policy.IsAdministrator ? ' (admin)' : ''), on, function (v) {
+                    p.UserIds = p.UserIds.filter(function (x) { return normId(x) !== uid; });
+                    if (v) p.UserIds.push(uid);
+                }));
+            });
+            var usersField = field('Applies to', null, userBox);
+            usersField.style.marginTop = '1em';
+            card.appendChild(usersField);
+
+            var grid = document.createElement('div');
+            grid.className = 'cg-grid';
+            grid.appendChild(field('Hide items tagged', 'Example: Adult, Horror*, NSFW', chipEditor(p.BlockedTags, 'cgTagList')));
+            grid.appendChild(field('Hide genres', 'Example: Horror, Thriller', chipEditor(p.BlockedGenres, 'cgGenreList')));
+            grid.appendChild(field('Hide ratings', 'Example: R, NC-17, TV-MA', chipEditor(p.BlockedRatings, 'cgRatingList')));
+            grid.appendChild(field('Only allow items tagged (optional)', 'If you fill this in, the user sees ONLY items with one of these tags. Leave it empty to show everything not blocked above.', chipEditor(p.AllowedTags, 'cgTagList', true)));
+            card.appendChild(grid);
+
+            var opts = document.createElement('div');
+            opts.className = 'cg-opts';
+            opts.style.marginTop = '1em';
+            opts.appendChild(checkbox('Episodes and seasons inherit tags, genres and rating from their series', p.InheritFromParents, function (v) { p.InheritFromParents = v; }));
+            opts.appendChild(checkbox('Items inherit tags from their library', p.InheritFromLibrary, function (v) { p.InheritFromLibrary = v; }));
+            opts.appendChild(checkbox('Hide items with no rating', p.BlockUnrated, function (v) { p.BlockUnrated = v; }));
+            card.appendChild(opts);
+
+            var prevOut = document.createElement('div');
+            prevOut.className = 'cg-preview';
+            card.appendChild(prevOut);
+            prevBtn.addEventListener('click', function () { preview(p, prevOut); });
+
+            host.appendChild(card);
+        });
+    }
+
+    function preview(p, out) {
+        out.innerHTML = '<p class="cg-muted">Scanning library…</p>';
+        ApiClient.getJSON(ApiClient.getUrl('ContentGuard/Preview/' + p.Id)).then(function (r) {
+            var total = P(r, 'Total') || 0;
+            var counts = P(r, 'Counts') || {};
+            var items = P(r, 'Items') || [];
+            var summary = Object.keys(counts).map(function (k) { return counts[k] + ' ' + k; }).join(', ');
+            var html = '<p><strong>' + total + '</strong> items hidden' + (summary ? ' (' + esc(summary) + ')' : '') + '.</p>';
+            if (items.length) {
+                html += '<table class="cg-table"><thead><tr><th>Title</th><th>Type</th><th>Why</th></tr></thead><tbody>';
+                items.forEach(function (i) {
+                    html += '<tr><td>' + esc(P(i, 'Name')) + '</td><td>' + esc(P(i, 'Type')) + '</td><td class="cg-muted">' + esc(P(i, 'Reason')) + '</td></tr>';
+                });
+                html += '</tbody></table>';
+            }
+            out.innerHTML = html;
+        }, function () {
+            out.innerHTML = '<p class="cg-muted">Save the profile first, then preview it.</p>';
+        });
+    }
+
+    /* ---------- tester ---------- */
+    function runTest() {
+        var uid = page.querySelector('#cgTestUser').value;
+        var term = page.querySelector('#cgTestTerm').value.trim();
+        var out = page.querySelector('#cgTestOut');
+        if (!term) { out.innerHTML = ''; return; }
+        out.innerHTML = '<p class="cg-muted">Checking…</p>';
+        ApiClient.getJSON(ApiClient.getUrl('ContentGuard/Test', { userId: uid, searchTerm: term })).then(function (r) {
+            var rows = P(r, 'Results') || [];
+            var pc = P(r, 'ProfileCount') || 0;
+            var html = pc === 0 ? '<p class="cg-muted">This user has no active Content Guard profile, so nothing is hidden by this plugin.</p>' : '';
+            if (!rows.length) { out.innerHTML = html + '<p class="cg-muted">No matching titles.</p>'; return; }
+            html += '<table class="cg-table"><thead><tr><th></th><th>Title</th><th>Type</th><th>Own tags</th><th>Why</th></tr></thead><tbody>';
+            rows.forEach(function (x) {
+                var b = P(x, 'Blocked');
+                html += '<tr><td><span class="cg-badge ' + (b ? 'blocked' : 'visible') + '">' + (b ? 'HIDDEN' : 'VISIBLE') + '</span></td>' +
+                    '<td>' + esc(P(x, 'Name')) + '</td><td>' + esc(P(x, 'Type')) + '</td>' +
+                    '<td class="cg-muted">' + esc((P(x, 'OwnTags') || []).join(', ')) + '</td>' +
+                    '<td class="cg-muted">' + esc(P(x, 'Reason') || '') + '</td></tr>';
+            });
+            out.innerHTML = html + '</tbody></table>';
+        }, function () { out.innerHTML = '<p class="cg-muted">Test failed. Check the server log.</p>'; });
+    }
+
+    /* ---------- load / save ---------- */
+    function fillDatalist(id, values) {
+        var dl = page.querySelector('#' + id);
+        dl.innerHTML = (values || []).map(function (v) { return '<option value="' + esc(v) + '"></option>'; }).join('');
+    }
+
+    function load() {
+        Dashboard.showLoadingMsg();
+        Promise.all([ApiClient.getPluginConfiguration(pluginId), ApiClient.getUsers()]).then(function (res) {
+            var c = res[0] || {};
+            users = (res[1] || []).slice().sort(function (a, b) { return a.Name.localeCompare(b.Name); });
+            config = {
+                Enabled: P(c, 'Enabled') !== false,
+                UseQueryExclusion: P(c, 'UseQueryExclusion') !== false,
+                LogBlocks: !!P(c, 'LogBlocks'),
+                Profiles: (P(c, 'Profiles') || []).map(normalizeProfile)
+            };
+            page.querySelector('#cgEnabled').checked = config.Enabled;
+            page.querySelector('#cgQueryExclusion').checked = config.UseQueryExclusion;
+            page.querySelector('#cgLogBlocks').checked = config.LogBlocks;
+
+            var sel = page.querySelector('#cgTestUser');
+            sel.innerHTML = users.map(function (u) { return '<option value="' + esc(u.Id) + '">' + esc(u.Name) + '</option>'; }).join('');
+
+            renderProfiles();
+            Dashboard.hideLoadingMsg();
+        }, function () { Dashboard.hideLoadingMsg(); toast('Could not load Content Guard settings.'); });
+
+        ApiClient.getJSON(ApiClient.getUrl('ContentGuard/Values')).then(function (v) {
+            fillDatalist('cgTagList', P(v, 'Tags'));
+            fillDatalist('cgGenreList', P(v, 'Genres'));
+            fillDatalist('cgRatingList', P(v, 'Ratings'));
+        }, function () { /* suggestions are optional */ });
+    }
+
+    function save() {
+        // commit any half-typed chip text
+        page.querySelectorAll('.cg-chips input').forEach(function (i) { if (i.value.trim()) i.dispatchEvent(new Event('change')); });
+        Dashboard.showLoadingMsg();
+        ApiClient.getPluginConfiguration(pluginId).then(function (current) {
+            current.Enabled = page.querySelector('#cgEnabled').checked;
+            current.UseQueryExclusion = page.querySelector('#cgQueryExclusion').checked;
+            current.LogBlocks = page.querySelector('#cgLogBlocks').checked;
+            current.Profiles = config.Profiles.map(normalizeProfile);
+            return ApiClient.updatePluginConfiguration(pluginId, current);
+        }).then(function (result) {
+            Dashboard.processPluginConfigurationUpdateResult(result);
+            return ApiClient.ajax({ type: 'POST', url: ApiClient.getUrl('ContentGuard/Rebuild') }).catch(function () { });
+        }, function () { Dashboard.hideLoadingMsg(); toast('Save failed.'); });
+    }
+
+    page.querySelector('#cgAddProfile').addEventListener('click', function () {
+        config.Profiles.push(emptyProfile());
+        renderProfiles();
+    });
+    page.querySelector('#cgSave').addEventListener('click', save);
+    page.querySelector('#cgTestBtn').addEventListener('click', runTest);
+    page.querySelector('#cgTestTerm').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runTest(); } });
+    page.addEventListener('pageshow', load);
+})();
+</script>
+</div>
+</body>
+</html>
