@@ -18,13 +18,13 @@ jobs:
         include:
           - jellyfin: '10.10'
             dotnet: '8.0.x'
-            version: '1.0.0.0'
+            version: '1.0.1.0'
           - jellyfin: '10.11'
             dotnet: '9.0.x'
-            version: '1.1.0.0'
+            version: '1.1.1.0'
           - jellyfin: '12.0'
             dotnet: '10.0.x'
-            version: '1.1.0.12'
+            version: '1.1.1.12'
     steps:
       - uses: actions/checkout@v4
 
@@ -76,9 +76,9 @@ jobs:
           base = "https://raw.githubusercontent.com/${{ github.repository }}/main/repo/"
           now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
           run = "${{ github.run_number }}"
-          builds = [("1.1.0.12", "12.0.0.0", f"content-guard-12-b{run}.zip"),
-                    ("1.1.0.0", "10.11.0.0", f"content-guard-10.11-b{run}.zip"),
-                    ("1.0.0.0", "10.10.0.0", f"content-guard-10.10-b{run}.zip")]
+          builds = [("1.1.1.12", "12.0.0.0", f"content-guard-12-b{run}.zip"),
+                    ("1.1.1.0", "10.11.0.0", f"content-guard-10.11-b{run}.zip"),
+                    ("1.0.1.0", "10.10.0.0", f"content-guard-10.10-b{run}.zip")]
           versions = []
           for ver, abi, f in builds:
               md5 = hashlib.md5(open(os.path.join("repo", f), "rb").read()).hexdigest()
