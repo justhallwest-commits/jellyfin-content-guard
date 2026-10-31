@@ -21,6 +21,21 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>Gets or sets a value indicating whether each block is written to the log (debug aid).</summary>
     public bool LogBlocks { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether all versions of a title (e.g. 1080p and 4K) are treated as one:
+    /// if any version is blocked, every version is. Jellyfin 12 only.
+    /// </summary>
+    public bool ShareAcrossVersions { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether "Because you watched…" and other recommendation rows drop blocked
+    /// titles, and drop the whole row when it is based on a blocked title.
+    /// </summary>
+    public bool FilterRecommendations { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether playlists and collections whose every title is blocked are hidden.</summary>
+    public bool HideEmptyCollections { get; set; }
+
     /// <summary>Gets or sets the rule profiles.</summary>
     public List<RuleProfile> Profiles { get; set; } = new();
 }

@@ -47,6 +47,13 @@
             <label><input is="emby-checkbox" type="checkbox" id="cgQueryExclusion"><span>Also exclude blocked items in the database query (keeps page counts accurate while browsing)</span></label>
             <label><input is="emby-checkbox" type="checkbox" id="cgLogBlocks"><span>Log every hidden item to the server log (for troubleshooting)</span></label>
         </div>
+        <h3 class="cg-sub" style="margin:1.2em 0 .4em">Jellyfin 12 options</h3>
+        <div class="cg-opts">
+            <label><input is="emby-checkbox" type="checkbox" id="cgVersions"><span>Treat all versions of a title as one (1080p, 4K, director's cut…): if any version is blocked, all of them are</span></label>
+            <label><input is="emby-checkbox" type="checkbox" id="cgRecs"><span>Clean up recommendation rows: no blocked titles in "Because you watched…", and no rows based on a blocked title</span></label>
+            <label><input is="emby-checkbox" type="checkbox" id="cgEmpty"><span>Hide playlists and collections when every title in them is blocked</span></label>
+        </div>
+        <p class="cg-muted" style="margin:.5em 0 0">Search from other plugins, playlist contents and collections are always filtered. The version option needs Jellyfin 12; the others work on every version.</p>
     </div>
 
     <div class="verticalSection">
@@ -317,11 +324,17 @@
                 Enabled: P(c, 'Enabled') !== false,
                 UseQueryExclusion: P(c, 'UseQueryExclusion') !== false,
                 LogBlocks: !!P(c, 'LogBlocks'),
+                ShareAcrossVersions: P(c, 'ShareAcrossVersions') !== false,
+                FilterRecommendations: P(c, 'FilterRecommendations') !== false,
+                HideEmptyCollections: !!P(c, 'HideEmptyCollections'),
                 Profiles: (P(c, 'Profiles') || []).map(normalizeProfile)
             };
             page.querySelector('#cgEnabled').checked = config.Enabled;
             page.querySelector('#cgQueryExclusion').checked = config.UseQueryExclusion;
             page.querySelector('#cgLogBlocks').checked = config.LogBlocks;
+            page.querySelector('#cgVersions').checked = config.ShareAcrossVersions;
+            page.querySelector('#cgRecs').checked = config.FilterRecommendations;
+            page.querySelector('#cgEmpty').checked = config.HideEmptyCollections;
 
             var sel = page.querySelector('#cgTestUser');
             sel.innerHTML = users.map(function (u) { return '<option value="' + esc(u.Id) + '">' + esc(u.Name) + '</option>'; }).join('');
@@ -345,6 +358,9 @@
             current.Enabled = page.querySelector('#cgEnabled').checked;
             current.UseQueryExclusion = page.querySelector('#cgQueryExclusion').checked;
             current.LogBlocks = page.querySelector('#cgLogBlocks').checked;
+            current.ShareAcrossVersions = page.querySelector('#cgVersions').checked;
+            current.FilterRecommendations = page.querySelector('#cgRecs').checked;
+            current.HideEmptyCollections = page.querySelector('#cgEmpty').checked;
             current.Profiles = config.Profiles.map(normalizeProfile);
             return ApiClient.updatePluginConfiguration(pluginId, current);
         }).then(function (result) {

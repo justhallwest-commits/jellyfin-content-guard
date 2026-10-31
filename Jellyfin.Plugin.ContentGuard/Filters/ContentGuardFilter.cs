@@ -189,6 +189,41 @@ public class ContentGuardFilter : IAsyncActionFilter
                 return removed == 0 ? value : kept;
             }
 
+            case IEnumerable<RecommendationDto> recommendations when RuleEvaluator.Config.FilterRecommendations:
+            {
+                // "Because you watched X" rows: drop blocked titles, and the whole row when X itself is blocked
+                // (its name would otherwise show in the row title).
+                var rows = new List<RecommendationDto>();
+                var changed = false;
+                foreach (var row in recommendations)
+                {
+                    if (row.CategoryId != Guid.Empty && _evaluator.Evaluate(row.CategoryId, profiles).Blocked)
+                    {
+                        changed = true;
+                        continue;
+                    }
+
+                    var items = (row.Items ?? Array.Empty<BaseItemDto>()).ToList();
+                    var kept = FilterDtos(items, profiles, userId, path, out var removed);
+                    if (removed > 0)
+                    {
+                        changed = true;
+                        row.Items = kept;
+                    }
+
+                    if (kept.Count > 0)
+                    {
+                        rows.Add(row);
+                    }
+                    else
+                    {
+                        changed = true;
+                    }
+                }
+
+                return changed ? rows : value;
+            }
+
             case SearchHintResult hints:
             {
                 var kept = new List<SearchHint>(hints.SearchHints.Count);
@@ -223,6 +258,13 @@ public class ContentGuardFilter : IAsyncActionFilter
         var kept = new List<BaseItemDto>(items.Count);
         foreach (var dto in items)
         {
+            if ((dto.Type == Jellyfin.Data.Enums.BaseItemKind.Playlist || dto.Type == Jellyfin.Data.Enums.BaseItemKind.BoxSet)
+                && _evaluator.IsEmptyAfterBlocking(dto.Id, profiles))
+            {
+                removed++;
+                continue;
+            }
+
             if (!RuleEvaluator.ScopedKinds.Contains(dto.Type))
             {
                 kept.Add(dto);
