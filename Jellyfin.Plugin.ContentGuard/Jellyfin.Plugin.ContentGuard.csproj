@@ -4,10 +4,12 @@
     Build for a specific Jellyfin server version:
       dotnet build -p:JellyfinVersion=10.10   (UGREEN NAS, Jellyfin 10.10.x, .NET 8)
       dotnet build -p:JellyfinVersion=10.11   (Jellyfin 10.11.x, .NET 9) - default
+      dotnet build -p:JellyfinVersion=12.0    (Jellyfin 12.x, .NET 10)
   -->
   <PropertyGroup>
     <JellyfinVersion Condition="'$(JellyfinVersion)' == ''">10.11</JellyfinVersion>
     <PluginVersion Condition="'$(PluginVersion)' == '' And '$(JellyfinVersion)' == '10.10'">1.0.0.0</PluginVersion>
+    <PluginVersion Condition="'$(PluginVersion)' == '' And '$(JellyfinVersion)' == '12.0'">1.1.0.12</PluginVersion>
     <PluginVersion Condition="'$(PluginVersion)' == ''">1.1.0.0</PluginVersion>
   </PropertyGroup>
 
@@ -16,8 +18,13 @@
     <DefineConstants>$(DefineConstants);JELLYFIN_10_10</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(JellyfinVersion)' != '10.10'">
+  <PropertyGroup Condition="'$(JellyfinVersion)' == '10.11'">
     <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(JellyfinVersion)' == '12.0'">
+    <TargetFramework>net10.0</TargetFramework>
+    <DefineConstants>$(DefineConstants);JELLYFIN_12</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

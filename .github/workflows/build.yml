@@ -22,6 +22,9 @@ jobs:
           - jellyfin: '10.11'
             dotnet: '9.0.x'
             version: '1.1.0.0'
+          - jellyfin: '12.0'
+            dotnet: '10.0.x'
+            version: '1.1.0.12'
     steps:
       - uses: actions/checkout@v4
 
@@ -67,12 +70,14 @@ jobs:
           rm -f repo/*.zip
           cp artifacts/content-guard-10.10/content-guard-10.10.zip repo/content-guard-10.10-b${{ github.run_number }}.zip
           cp artifacts/content-guard-10.11/content-guard-10.11.zip repo/content-guard-10.11-b${{ github.run_number }}.zip
+          cp artifacts/content-guard-12.0/content-guard-12.0.zip repo/content-guard-12-b${{ github.run_number }}.zip
           python3 - <<'EOF'
           import hashlib, json, datetime, os
           base = "https://raw.githubusercontent.com/${{ github.repository }}/main/repo/"
           now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
           run = "${{ github.run_number }}"
-          builds = [("1.1.0.0", "10.11.0.0", f"content-guard-10.11-b{run}.zip"),
+          builds = [("1.1.0.12", "12.0.0.0", f"content-guard-12-b{run}.zip"),
+                    ("1.1.0.0", "10.11.0.0", f"content-guard-10.11-b{run}.zip"),
                     ("1.0.0.0", "10.10.0.0", f"content-guard-10.10-b{run}.zip")]
           versions = []
           for ver, abi, f in builds:
