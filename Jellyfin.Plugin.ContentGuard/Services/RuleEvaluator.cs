@@ -92,6 +92,42 @@ public class RuleEvaluator
             .ToList();
     }
 
+    /// <summary>
+    /// Whether a playlist or collection should be hidden because every title in it is blocked
+    /// (only when "Hide playlists and collections with nothing left" is on).
+    /// </summary>
+    /// <param name="containerId">Playlist or collection id.</param>
+    /// <param name="profiles">Profiles.</param>
+    /// <returns>True when it has titles and all of them are blocked.</returns>
+    public bool IsEmptyAfterBlocking(Guid containerId, IReadOnlyList<RuleProfile> profiles)
+    {
+        if (!Config.HideEmptyCollections || profiles.Count == 0)
+        {
+            return false;
+        }
+
+        try
+        {
+            if (_libraryManager.GetItemById(containerId) is not Folder folder)
+            {
+                return false;
+            }
+
+            var children = folder.GetLinkedChildren();
+            if (children.Count == 0)
+            {
+                return false;
+            }
+
+            return children.All(c => c is null || Evaluate(c, profiles).Blocked);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Content Guard: couldn't check contents of {Id}", containerId);
+            return false;
+        }
+    }
+
     /// <summary>Evaluates an item id for a set of profiles.</summary>
     /// <param name="itemId">Item id.</param>
     /// <param name="profiles">Profiles.</param>
@@ -231,6 +267,35 @@ public class RuleEvaluator
 
         AddAll(tags, item.Tags);
         AddAll(genres, item.Genres);
+
+#if JELLYFIN_12
+        // Jellyfin 12 groups versions of a title (1080p / 4K, cuts) as separate items. Treat them as one,
+        // so a tag on any version applies to all of them.
+        if (Config.ShareAcrossVersions && item is Video video)
+        {
+            try
+            {
+                foreach (var version in video.GetAllVersions())
+                {
+                    if (version.Id.Equals(item.Id))
+                    {
+                        continue;
+                    }
+
+                    AddAll(tags, version.Tags);
+                    AddAll(genres, version.Genres);
+                    if (string.IsNullOrWhiteSpace(rating) && !string.IsNullOrWhiteSpace(version.OfficialRating))
+                    {
+                        rating = version.OfficialRating;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Content Guard: version lookup failed for {Id}", item.Id);
+            }
+        }
+#endif
 
         if (parents)
         {
